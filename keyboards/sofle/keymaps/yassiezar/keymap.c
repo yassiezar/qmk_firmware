@@ -426,6 +426,10 @@ bool oled_task_user(void) {
 
 #endif
 
+layer_state_t layer_state_set_user(layer_state_t state) {
+    return update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KC_QWERTY:
@@ -648,43 +652,37 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 isJumping = false;
             }
             break;
-
-            /* KEYBOARD PET STATUS END */
     }
     return true;
 }
 
 #ifdef ENCODER_ENABLE
 
+void perform_left_encoder_action(bool clockwise) {
+    if (clockwise) {
+        if (shift_held) tap_code(KC_VOLU);
+        else tap_code(KC_RIGHT);
+    } else {
+        if (shift_held)tap_code(KC_VOLD);
+        else tap_code(KC_LEFT);
+    }
+}
+
+void perform_right_encoder_action(bool clockwise) {
+    if (clockwise) {
+        if (shift_held) tap_code(KC_PGDN);
+        else tap_code(KC_DOWN);
+    } else {
+        if (shift_held) tap_code(KC_PGUP);
+        else tap_code(KC_UP);
+    }
+}
+
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (index == 0) {
-        if (clockwise) {
-            if (shift_held) {
-                tap_code(KC_MNXT);
-            } else {
-                tap_code(KC_RIGHT);
-            }
-        } else {
-            if (shift_held) {
-                tap_code(KC_MPRV);
-            } else {
-                tap_code(KC_LEFT);
-            }
-        }
-    } else if (index == 1) {
-        if (clockwise) {
-            if (shift_held) {
-                tap_code(KC_VOLU);
-            } else {
-                tap_code(KC_DOWN);
-            }
-        } else {
-            if (shift_held) {
-                tap_code(KC_VOLD);
-            } else {
-                tap_code(KC_UP);
-            }
-        }
+        perform_left_encoder_action(clockwise);
+    } else {
+        perform_right_encoder_action(clockwise);
     }
     return true;
 }
